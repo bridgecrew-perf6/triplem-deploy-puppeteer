@@ -1,16 +1,16 @@
 const puppeteer = require('puppeteer');
 
 const bot = async() =>{
-    const browser = puppeteer.launch({
+    const browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox']
     });
-    const page = await (await browser).newPage();
+    const page = await browser.newPage();
     await page.goto('https://google.com', {
         waitUntil: 'networkidle2'
     });
-    await await browser.close();
+    await browser.close();
     return 'Done';
-}
+};
 //test commit
 module.exports = bot;
