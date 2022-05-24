@@ -1,25 +1,62 @@
+'use strict';
+
 const express = require('express');
 //const bot = require('./bot');
 //const songBot = require('./songBot.js');
-const app = express();
+//const app = express();
 const http = require('http');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
+//const server = http.createServer(app);
+//const { Server } = require("socket.io");
+//const io = new Server(server);
 
-app.get('/',async(req,res)=>{
-    
+//const express = app;
+const socketIO = require('socket.io');
+
+//const PORT = process.env.PORT || 3000;
+const INDEX = '/index.html';
+
+
+const PORT = process.env.PORT || 3000;
+
+/*
+server.listen(PORT, () => {
+    console.log(`listening on *:${PORT}`);
+  });
+*/
+
+  const app = express()
+  .get('/',async(req,res)=>{
     res.sendFile(__dirname + '/index.html');
+  console.log("caught / req, calling bot...")
+  const response = await bot()
+  //console.log("got bot response, send response...")
+  //res.send(response);
+  //console.log("end...")
+})
+  //.use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+  .listen(PORT, () => console.log(`Listening on ${PORT}`))
+  ;
 
+const io = socketIO(app);
+
+io.on('connection', (socket) => {
+  console.log('Client connected');
+  socket.on('disconnect', () => console.log('Client disconnected'));
+});
+
+setInterval(() => io.emit('time', new Date().toTimeString()), 1000);
+
+  
+/*
+app.get('/',async(req,res)=>{
+      res.sendFile(__dirname + '/index.html');
     console.log("caught / req, calling bot...")
     const response = await bot()
     //console.log("got bot response, send response...")
     //res.send(response);
     //console.log("end...")
-    
-    
 });
-
+*/
 
 
 io.on('connection', (socket) => {
@@ -43,11 +80,7 @@ io.on('connection', (socket) => {
     });
   });
 
-const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-    console.log(`listening on *:${PORT}`);
-  });
 
 /*
 app.listen(PORT,(err)=>{
@@ -106,7 +139,7 @@ async function bot() {
     console.log("Song: " + songNameText);
     console.log("Artist: " + artistNameText);
     console.log("----------------------------------");
-    var str = "<br>" + dateTime + ", " + songNameText + ", " + artistNameText + ";"
+    var str = dateTime + ", " + songNameText + ", " + artistNameText + ";"
     songLogged = songNameText
     artistLogged = artistNameText
     //document.getElementById("songLog").innerHTML += str;
