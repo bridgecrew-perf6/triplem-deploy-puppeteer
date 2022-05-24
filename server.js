@@ -1,5 +1,6 @@
 const express = require('express');
-const bot = require('./bot')
+const bot = require('./bot');
+//const songBot = require('./songBot.js');
 const app = express();
 
 app.get('/',async(req,res)=>{
