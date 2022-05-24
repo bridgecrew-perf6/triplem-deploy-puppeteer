@@ -139,7 +139,7 @@ async function bot() {
     console.log("Song: " + songNameText);
     console.log("Artist: " + artistNameText);
     console.log("----------------------------------");
-    var str = dateTime + ", " + songNameText + ", " + artistNameText + ";"
+    var str =  dateTime + ", " + songNameText + ", " + artistNameText + ";"
     songLogged = songNameText
     artistLogged = artistNameText
     //document.getElementById("songLog").innerHTML += str;
