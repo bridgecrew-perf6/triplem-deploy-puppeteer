@@ -1,4 +1,7 @@
 const puppeteer = require('puppeteer');
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const bot = async() =>{
     const browser = await puppeteer.launch({
@@ -15,6 +18,10 @@ const bot = async() =>{
 
     var songLogged = ''
     var artistLogged = ''
+    const repeat = 1000000
+    var count = 0
+
+    do {
     const songName = await page.$("span[class='song-name']")
     //obtain text
     const songNameText = await (await songName.getProperty('textContent')).jsonValue()
@@ -22,6 +29,8 @@ const bot = async() =>{
     const artistName = await page.$("span[class='artist-name']")
     //obtain text
     const artistNameText = await (await artistName.getProperty('textContent')).jsonValue()
+    
+    if (songNameText != songLogged) {
     var today = new Date();
     var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
@@ -31,9 +40,14 @@ const bot = async() =>{
     console.log("Artist: " + artistNameText);
     console.log("----------------------------------");
     var str = dateTime + "\t" + songNameText + "\t" + artistNameText + "\r\n"
-
+    songLogged = songNameText
+    artistLogged = artistNameText
+}
     
-    
+    count += 1
+        //console.log("Loop count: " + count)
+        await sleep(3000);
+    } while (count < repeat)
     
     await browser.close();
     return str;
