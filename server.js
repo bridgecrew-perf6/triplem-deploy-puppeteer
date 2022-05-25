@@ -14,7 +14,8 @@ const socketIO = require('socket.io');
 
 //const PORT = process.env.PORT || 3000;
 const INDEX = '/index.html';
-
+const querystring = require('querystring');
+const request = require("request");
 
 const PORT = process.env.PORT || 3000;
 
@@ -164,7 +165,10 @@ async function bot() {
             insert into tracksNew (timePlayed, song, artist)
             VALUES($1, $2, $3);
             `;
-      pool.query(insertSQL, [dateTime, songNameText, artistNameText])
+      pool.query(insertSQL, [dateTime, songNameText, artistNameText]);
+      const urlToSend = `https://docs.google.com/forms/d/e/1FAIpQLSfTC6W0U2iJpn7I-UxhnP3hnmWPAvjrWHQFhqfOKxRJBQgHNA/formResponse?usp=pp_url&entry.${querystring.stringify({1109149267:dateTime})}&entry.${querystring.stringify({1800149853:songNameText})}&entry.${querystring.stringify({1153594467:artistNameText})}&submit=Submit`
+      //console.log(urlToSend);
+      sendToSheets(urlToSend);
     }
 
     count += 1
@@ -174,4 +178,15 @@ async function bot() {
 
   await browser.close();
   return str;
+};
+
+function sendToSheets(url){
+
+request.get(url,function(error,response,body){
+           if(error){
+                 //console.log(error);
+           }else{
+                 //console.log(response);
+         }
+});
 };
