@@ -18,21 +18,30 @@ const INDEX = '/index.html';
 
 const PORT = process.env.PORT || 3000;
 
+const { Pool, Client } = require('pg')
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'testdb',
+  password: 'password',
+  port: 5432,
+})
+
 /*
 server.listen(PORT, () => {
     console.log(`listening on *:${PORT}`);
   });
 */
 
-  const app = express()
-  .get('/',async(req,res)=>{
+const app = express()
+  .get('/', async (req, res) => {
     res.sendFile(__dirname + '/index.html');
-  console.log("caught / req, calling bot...")
-  const response = await bot()
-  //console.log("got bot response, send response...")
-  //res.send(response);
-  //console.log("end...")
-})
+    console.log("caught / req, calling bot...")
+    const response = await bot()
+    //console.log("got bot response, send response...")
+    //res.send(response);
+    //console.log("end...")
+  })
   //.use((req, res) => res.sendFile(INDEX, { root: __dirname }))
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
   ;
@@ -46,7 +55,7 @@ io.on('connection', (socket) => {
 
 setInterval(() => io.emit('time', new Date().toTimeString()), 1000);
 
-  
+
 /*
 app.get('/',async(req,res)=>{
       res.sendFile(__dirname + '/index.html');
@@ -60,25 +69,25 @@ app.get('/',async(req,res)=>{
 
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
-    io.emit('chat message', 'Hi!');
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
-      });
+  console.log('a user connected');
+  io.emit('chat message', 'Hi!');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
   });
+});
 
-  io.on('connection', (socket) => {
-    socket.on('chat message', (msg) => {
-      console.log('message: ' + msg);
-      
-    });
-  });
+io.on('connection', (socket) => {
+  socket.on('chat message', (msg) => {
+    console.log('message: ' + msg);
 
-  io.on('connection', (socket) => {
-    socket.on('chat message', (msg) => {
-      io.emit('chat message', msg);
-    });
   });
+});
+
+io.on('connection', (socket) => {
+  socket.on('chat message', (msg) => {
+    io.emit('chat message', msg);
+  });
+});
 
 
 
@@ -91,67 +100,78 @@ app.listen(PORT,(err)=>{
 
 const puppeteer = require('puppeteer');
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
+
 async function bot() {
-    console.log(`bot started`);
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox']
-    });
-    console.log(`browser started`);
-    const page = await browser.newPage();
-    //await page.goto('https://google.com', {
-    //    waitUntil: 'networkidle2'
-    //});
-    
-    console.log(`new page started`);
-    await page.goto('https://mytuner-radio.com/radio/triple-m-country-449782/'
+  console.log(`bot started`);
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox']
+  });
+  console.log(`browser started`);
+  const page = await browser.newPage();
+  //await page.goto('https://google.com', {
+  //    waitUntil: 'networkidle2'
+  //});
+
+  console.log(`new page started`);
+  //await page.goto('https://mytuner-radio.com/radio/triple-m-country-449782/'
+  await page.goto('https://www.triplem.com.au/country'
     //, 
     //{
     //    waitUntil: 'networkidle2'
     //}
-    );
-    
-    console.log(`page loaded`);
-    var songLogged = ''
-    var artistLogged = ''
-    const repeat = 1000000
-    var count = 0
+  );
 
-    do {
-    const songName = await page.$("span[class='song-name']")
+  console.log(`page loaded`);
+  var songLogged = ''
+  var artistLogged = ''
+  const repeat = 1000000
+  var count = 0
+
+  do {
+    const songName = await page.$("p[class='Paragraph__ParagraphBase-sc-1un50nq-0 Paragraph__MultiLineEllipsisBase-sc-1un50nq-1 Paragraph__MultiLineEllipsis-sc-1un50nq-3 bhvhXQ']")
     //obtain text
-    const songNameText = await (await songName.getProperty('textContent')).jsonValue()
+    const text = await (await songName.getProperty('textContent')).jsonValue();
+    const substrings = text.split(' - ');
+    const songNameText = substrings[1]
     //console.log("Obtained text is: " + songNameText)
-    const artistName = await page.$("span[class='artist-name']")
+    //const artistName = ''//await page.$("span[class='artist-name']")
     //obtain text
-    const artistNameText = await (await artistName.getProperty('textContent')).jsonValue()
-    
+    const artistNameText = substrings[0]
+
     if (songNameText != songLogged) {
-        
-    var today = new Date();
-    var dateTime = today.toLocaleString('en-AU', { timeZone: 'Australia/Melbourne' });
-    //var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-    //var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    //var dateTime = date + ' ' + time;
-    console.log(dateTime);
-    console.log("Song: " + songNameText);
-    console.log("Artist: " + artistNameText);
-    console.log("----------------------------------");
-    var str =  dateTime + ", " + songNameText + ", " + artistNameText + ";"
-    songLogged = songNameText
-    artistLogged = artistNameText
-    //document.getElementById("songLog").innerHTML += str;
-    io.emit('chat message', str);
-}
-    
+
+      var today = new Date();
+      var dateTime = today.toLocaleString('en-AU', { timeZone: 'Australia/Melbourne' });
+      //var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+      //var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+      //var dateTime = date + ' ' + time;
+      console.log(dateTime);
+      console.log("Song: " + songNameText);
+      console.log("Artist: " + artistNameText);
+      console.log("----------------------------------");
+      var str = dateTime + ", " + songNameText + ", " + artistNameText + ";"
+      songLogged = songNameText
+      artistLogged = artistNameText
+      //document.getElementById("songLog").innerHTML += str;
+      io.emit('chat message', str);
+      //let queryString = "insert into tracks(timestamp, song, artist)VALUES(" + dateTime + "," + songNameText + "," + artistNameText + ")";
+      const insertSQL = `
+            insert into tracksNew (timePlayed, song, artist)
+            VALUES($1, $2, $3);
+            `;
+      pool.query(insertSQL, [dateTime, songNameText, artistNameText])
+    }
+
     count += 1
-        //console.log("Loop count: " + count)
-        await sleep(3000);
-    } while (count < repeat)
-    
-    await browser.close();
-    return str;
+    //console.log("Loop count: " + count)
+    await sleep(3000);
+  } while (count < repeat)
+
+  await browser.close();
+  return str;
 };
