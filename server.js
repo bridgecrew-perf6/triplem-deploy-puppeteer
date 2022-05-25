@@ -132,9 +132,10 @@ async function bot() {
   var artistLogged = ''
   const repeat = 1000000
   var count = 0
+  let dataElement = "p[class='Paragraph__ParagraphBase-sc-1un50nq-0 Paragraph__MultiLineEllipsisBase-sc-1un50nq-1 Paragraph__MultiLineEllipsis-sc-1un50nq-3 bhvhXQ']"
 
   do {
-    const songName = await page.$("p[class='Paragraph__ParagraphBase-sc-1un50nq-0 Paragraph__MultiLineEllipsisBase-sc-1un50nq-1 Paragraph__MultiLineEllipsis-sc-1un50nq-3 bhvhXQ']")
+    const songName = await page.$(dataElement)
     //obtain text
     const text = await (await songName.getProperty('textContent')).jsonValue();
     const substrings = text.split(' - ');
@@ -166,11 +167,16 @@ async function bot() {
             VALUES($1, $2, $3);
             `;
       pool.query(insertSQL, [dateTime, songNameText, artistNameText]);
-      const urlToSend = `https://docs.google.com/forms/d/e/1FAIpQLSfTC6W0U2iJpn7I-UxhnP3hnmWPAvjrWHQFhqfOKxRJBQgHNA/formResponse?usp=pp_url&entry.${querystring.stringify({1109149267:dateTime})}&entry.${querystring.stringify({1800149853:songNameText})}&entry.${querystring.stringify({1153594467:artistNameText})}&submit=Submit`
+      const baseUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfTC6W0U2iJpn7I-UxhnP3hnmWPAvjrWHQFhqfOKxRJBQgHNA/formResponse?usp=pp_url&entry.`
+      const urlToSend = baseUrl + `${querystring.stringify({1109149267:dateTime})}&entry.${querystring.stringify({1800149853:songNameText})}&entry.${querystring.stringify({1153594467:artistNameText})}&submit=Submit`
       //console.log(urlToSend);
       sendToSheets(urlToSend);
-    }
+      //let gUrl = new URL('https://docs.google.com/forms/d/e/1FAIpQLSfTC6W0U2iJpn7I-UxhnP3hnmWPAvjrWHQFhqfOKxRJBQgHNA/viewform?usp=pp_url&entry.1109149267=25/05/2022,+1:47:22+pm&entry.1800149853=Coming+Home&entry.1153594467=Keith+Urban+feat.+Julia+Michaels');
+      //let params = new URLSearchParams(gUrl.search);
+      
 
+    }
+    //console.log(`browser is connected?: ${browser.isConnected()}`);
     count += 1
     //console.log("Loop count: " + count)
     await sleep(3000);
